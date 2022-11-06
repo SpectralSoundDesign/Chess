@@ -171,20 +171,67 @@ class Board
     board_nodes[id].current_piece
   end
 
-  def move_piece
+  def select_piece
     puts "Choose location of piece to move:"
     find_piece_x = gets.chomp.to_i
     find_piece_y = gets.chomp.to_i
 
     current_piece = find_piece([find_piece_x, find_piece_y])
 
-    if current_piece.class.name == "Pawn"
+    case current_piece.class.name
+    when "Pawn"
       current_piece.find_possible_moves(@board_nodes)
+    when "Knight"
+      current_piece.find_possible_moves(@board_nodes)
+    when "Bishop"
+      current_piece.find_possible_moves(@board_nodes)
+    when "Rook"
+      current_piece.find_possible_moves(@board_nodes)
+    when "King"
+      current_piece.find_possible_moves(@board_nodes)
+    when "Queen"
+      current_piece.find_possible_moves(@board_nodes)
+    else
+      "You did not select a piece."
     end
+    
+    unless current_piece.possible_moves.empty?
+      puts "Pick one of these possible moves:"
+      current_piece.possible_moves.each do |n|
+        puts "#{n.position}"
+      end
 
-    puts "Pick one of these possible moves:"
-    current_piece.possible_moves.each do |n|
-      puts "#{n.position}"
+      piece_destination_x = gets.chomp.to_i
+      piece_destination_y = gets.chomp.to_i
+      piece_destination = [piece_destination_x, piece_destination_y]
+
+      move_piece(piece_destination, current_piece)
     end
+  end
+
+  def move_piece(piece_destination, current_piece)
+    desination_square = find_square(piece_destination)
+    current_square = current_piece.current_square
+
+    #update destination square and connect to current piece
+    current_piece.current_square = desination_square
+    current_piece.current_position = desination_square.position
+    desination_square.current_piece = current_piece
+
+    if current_square.current_symbol == current_piece.white_symbol
+      desination_square.current_symbol = current_piece.white_symbol
+    else
+      desination_square.current_symbol = current_piece.black_symbol
+    end
+    
+    desination_square.occupied = true
+
+    #clear curremt square
+    current_square.current_piece = nil
+    current_square.current_symbol = " "
+    current_square.occupied = false
+
+    print_board
+    select_piece
   end
 end

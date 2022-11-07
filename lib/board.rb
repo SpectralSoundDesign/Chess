@@ -1,14 +1,16 @@
 require_relative 'pieces.rb'
+require_relative 'utilities.rb'
 
 class Board
+  include Search
   attr_accessor :board_nodes
 
   def initialize
     @board_nodes = []
     a = *(1..8)
     a.each do |i|
-      a.each do |j|
-        @board_nodes.push(Square.new([i, j]))
+      a.reverse_each do |j|
+        @board_nodes.push(Square.new(j, i))
       end
     end
   end
@@ -159,38 +161,32 @@ class Board
     print_board
   end
 
-  def find_square(pos)
-    i, j = pos
-    id = (i - 1) * 8 + (j - 1)
-    board_nodes[id]
-  end
-  
-  def find_piece(pos)
-    i, j = pos
-    id = (i - 1) * 8 + (j - 1)
-    board_nodes[id].current_piece
-  end
-
   def select_piece
     puts "Choose location of piece to move:"
     find_piece_x = gets.chomp.to_i
     find_piece_y = gets.chomp.to_i
 
-    current_piece = find_piece([find_piece_x, find_piece_y])
+    current_piece = find_piece([find_piece_x, find_piece_y], @board_nodes)
 
     case current_piece.class.name
     when "Pawn"
       current_piece.find_possible_moves(@board_nodes)
+      puts "Move the pawn"
     when "Knight"
       current_piece.find_possible_moves(@board_nodes)
+      puts "Move the knight"
     when "Bishop"
       current_piece.find_possible_moves(@board_nodes)
+      puts "Move the bishop"
     when "Rook"
       current_piece.find_possible_moves(@board_nodes)
+      puts "Move the rook"
     when "King"
       current_piece.find_possible_moves(@board_nodes)
+      puts "Move the king"
     when "Queen"
       current_piece.find_possible_moves(@board_nodes)
+      puts "Move the queen"
     else
       "You did not select a piece."
     end
@@ -210,7 +206,7 @@ class Board
   end
 
   def move_piece(piece_destination, current_piece)
-    desination_square = find_square(piece_destination)
+    desination_square = find_square(piece_destination, @board_nodes)
     current_square = current_piece.current_square
 
     #update destination square and connect to current piece
@@ -223,7 +219,7 @@ class Board
     else
       desination_square.current_symbol = current_piece.black_symbol
     end
-    
+
     desination_square.occupied = true
 
     #clear curremt square
@@ -232,6 +228,64 @@ class Board
     current_square.occupied = false
 
     print_board
+    current_board_state
     select_piece
+  end
+
+  def current_board_state
+    current_board = @board_nodes
+    count = 1
+
+    current_board.each_with_index do |n, i|
+      if i % 8 == 0
+        print "\n"
+        puts "   ========================================================================"
+        print " #{count} "
+
+        count += 1
+      end
+      
+      if n.current_piece == nil
+        print "|  nil  |"
+      elsif n.current_piece.color == "white"
+        case n.current_piece.class.name
+        when "Pawn"
+          print "| #{n.current_piece.class.name[0]} + 1 |"
+        when "Knight"
+          print "| #{n.current_piece.class.name[0]} + 2 |"
+        when "Bishop"
+          print "| #{n.current_piece.class.name[0]} + 3 |"
+        when "Rook"
+          print "| #{n.current_piece.class.name[0]} + 5 |"
+        when "King"
+          print "| #{n.current_piece.class.name[0]} + 10 |"
+        when "Queen"
+          print "| #{n.current_piece.class.name[0]} + 9 |"
+        else
+          "You did not select a piece."
+        end
+      elsif n.current_piece.color == "black"
+        case n.current_piece.class.name
+        when "Pawn"
+          print "| #{n.current_piece.class.name[0]} - 1 |"
+        when "Knight"
+          print "| #{n.current_piece.class.name[0]} - 2 |"
+        when "Bishop"
+          print "| #{n.current_piece.class.name[0]} - 3 |"
+        when "Rook"
+          print "| #{n.current_piece.class.name[0]} - 5 |"
+        when "King"
+          print "| #{n.current_piece.class.name[0]} - 10 |"
+        when "Queen"
+          print "| #{n.current_piece.class.name[0]} - 9 |"
+        else
+          "You did not select a piece."
+        end
+      end
+    end
+
+    print "\n"
+    puts "   ========================================================================"
+    puts "     h    g    f    e    d    c    b    a  "
   end
 end

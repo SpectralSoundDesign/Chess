@@ -1,10 +1,12 @@
 require 'pry'
+require_relative 'utilities.rb'
 
 class Square
+  include Search
   attr_accessor :position, :current_piece, :current_symbol, :occupied
 
-  def initialize(pos)
-    @position = pos
+  def initialize(x_cor = nil, y_cor = nil)
+    @position = [x_cor, y_cor]
     @current_piece = nil
     @current_symbol = " "
     @occupied = false
@@ -12,6 +14,7 @@ class Square
 end
 
 class Pawn
+  include Search
   attr_accessor :black_symbol, :white_symbol, 
   :current_square, :current_position, :color, :possible_moves
 
@@ -25,53 +28,12 @@ class Pawn
   end
 
   def find_possible_moves(board_nodes)
-    #possible moves
-    valid_moves = [[2, 0], [1, 0]]
-    t_or_f? = []
-
-    #get current_piece position and add the valid moves.
-    valid_moves.each do |move|
-      x, y = self.current_position
-
-      if self.color == "white"
-        dest_x = x - move[0]
-        dest_y = y + move[1]
-        t_or_f?.push(check_if_path_true(dest_x, dest_y))
-      else
-        dest_x = x + move[0]
-        dest_y = y - move[1]
-        t_or_f?.push(check_if_path_true(dest_x, dest_y))
-      end
-    end
-
-    binding.pry
-    #get the square node of that position and check if it is occupied
-    current_square = find_square(dest_x, dest_y)
-
-    if current_square.occupied == false
-      self.possible_moves.push(current_square)
-    end
-  end
-
-  def check_if_path_true(dest_x, dest_y)
-    current_position = [dest_x, dest_y]
-    current_square = find_square(current_position)
-
-    if current_square.occupied == true
-      true
-    end
-    
-    false
-  end
-
-  def find_square(pos)
-    i, j = pos
-    id = (i - 1) * 8 + (j - 1)
-    board_nodes[id]
+    p self.current_position
   end
 end
 
 class Knight
+  include Search
   attr_accessor :black_symbol, :white_symbol, 
   :current_square, :current_position, :color, :possible_moves
 
@@ -83,9 +45,13 @@ class Knight
     @white_symbol = "\u265E".encode('utf-8')
     @possible_moves = []
   end
+
+  def find_possible_moves(board_nodes)
+  end
 end
 
 class Bishop
+  include Search
   attr_accessor :black_symbol, :white_symbol, 
   :current_square, :current_position, :color, :possible_moves
 
@@ -99,32 +65,11 @@ class Bishop
   end
 
   def find_possible_moves(board_nodes)
-    #possible moves
-    valid_moves = [[2, 0], [1, 0]]
-
-    #get current_piece position and add the valid moves.
-    valid_moves.each do |move|
-      x, y = self.current_position
-
-      if self.color == "white"
-        dest_x = x - move[0]
-        dest_y = y + move[1]
-      else
-        dest_x = x + move[0]
-        dest_y = y - move[1]
-      end
-      #get the square node of that position and check if it is occupied
-      id = (dest_x - 1) * 8 + (dest_y - 1)
-      current_square = board_nodes[id]
-
-      if current_square.occupied == false
-        self.possible_moves.push(current_square)
-      end
-    end
   end
 end
 
 class Rook
+  include Search
   attr_accessor :black_symbol, :white_symbol, 
   :current_square, :current_position, :color, :possible_moves
 
@@ -138,32 +83,17 @@ class Rook
   end
 
   def find_possible_moves(board_nodes)
-    #possible moves
-    valid_moves = [[2, 0], [1, 0]]
+    p self.current_position
+    p self.color
 
-    #get current_piece position and add the valid moves.
-    valid_moves.each do |move|
-      x, y = self.current_position
-
-      if self.color == "white"
-        dest_x = x - move[0]
-        dest_y = y + move[1]
-      else
-        dest_x = x + move[0]
-        dest_y = y - move[1]
-      end
-      #get the square node of that position and check if it is occupied
-      id = (dest_x - 1) * 8 + (dest_y - 1)
-      current_square = board_nodes[id]
-
-      if current_square.occupied == false
-        self.possible_moves.push(current_square)
-      end
-    end
+    possible_move_square = find_square([8, 6], board_nodes)
+    #return position of squares that can be moved to
+    self.possible_moves.push(possible_move_square)
   end
 end
 
 class King
+  include Search
   attr_accessor :black_symbol, :white_symbol, 
   :current_square, :current_position, :color, :possible_moves
 
@@ -177,32 +107,11 @@ class King
   end
 
   def find_possible_moves(board_nodes)
-    #possible moves
-    valid_moves = [[2, 0], [1, 0]]
-
-    #get current_piece position and add the valid moves.
-    valid_moves.each do |move|
-      x, y = self.current_position
-
-      if self.color == "white"
-        dest_x = x - move[0]
-        dest_y = y + move[1]
-      else
-        dest_x = x + move[0]
-        dest_y = y - move[1]
-      end
-      #get the square node of that position and check if it is occupied
-      id = (dest_x - 1) * 8 + (dest_y - 1)
-      current_square = board_nodes[id]
-
-      if current_square.occupied == false
-        self.possible_moves.push(current_square)
-      end
-    end
   end
 end
 
 class Queen
+  include Search
   attr_accessor :black_symbol, :white_symbol, 
   :current_square, :current_position, :color, :possible_moves
 
@@ -216,27 +125,5 @@ class Queen
   end
 
   def find_possible_moves(board_nodes)
-    #possible moves
-    valid_moves = [[2, 0], [1, 0]]
-
-    #get current_piece position and add the valid moves.
-    valid_moves.each do |move|
-      x, y = self.current_position
-
-      if self.color == "white"
-        dest_x = x - move[0]
-        dest_y = y + move[1]
-      else
-        dest_x = x + move[0]
-        dest_y = y - move[1]
-      end
-      #get the square node of that position and check if it is occupied
-      id = (dest_x - 1) * 8 + (dest_y - 1)
-      current_square = board_nodes[id]
-
-      if current_square.occupied == false
-        self.possible_moves.push(current_square)
-      end
-    end
   end
 end

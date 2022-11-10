@@ -192,14 +192,20 @@ class Board
     end
     
     unless current_piece.possible_moves.empty?
+      print_board
+
       puts "Pick one of these possible moves:"
       current_piece.possible_moves.each do |n|
-        puts "#{n.position}"
+        n.current_symbol = " "
+        print "#{n.position}"
       end
 
       piece_destination_x = gets.chomp.to_i
       piece_destination_y = gets.chomp.to_i
       piece_destination = [piece_destination_x, piece_destination_y]
+      desination_square = find_square(piece_destination, @board_nodes)
+
+      current_piece.move_history.push(desination_square)
 
       move_piece(piece_destination, current_piece)
     end
@@ -228,7 +234,6 @@ class Board
     current_square.occupied = false
 
     print_board
-    current_board_state
     select_piece
   end
 

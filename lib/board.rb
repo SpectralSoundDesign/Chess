@@ -1,5 +1,6 @@
 require_relative 'pieces.rb'
 require_relative 'utilities.rb'
+require_relative 'player.rb'
 
 class Board
   include Search
@@ -13,6 +14,12 @@ class Board
         @board_nodes.push(Square.new(j, i))
       end
     end
+    player1 = Player.new('white')
+    player2 = Player.new('black')
+    computer = Computer.new('black')
+    @current_player = [player1, computer]
+    @current_white = []
+    @current_black = []
   end
 
   def print_board
@@ -162,30 +169,53 @@ class Board
   end
 
   def select_piece
-    puts "Choose location of piece to move:"
-    find_piece_x = gets.chomp.to_i
-    find_piece_y = gets.chomp.to_i
+    puts "#{@current_player[0].color}, choose location of piece to move:"
+    
+    if @current_player[0].class.name == "Player"
+      find_piece_x = gets.chomp.to_i
+      find_piece_y = gets.chomp.to_i
 
-    current_piece = find_piece([find_piece_x, find_piece_y], @board_nodes)
+      current_piece = find_piece([find_piece_x, find_piece_y], @board_nodes)
+    else
+      @board_nodes.each do |n|
+        if n.current_piece.nil? == false && n.current_piece.color == 'black'
+          @current_black.push(n.position)
+        end
+      end
+
+      computer_piece = @current_black.sample
+      
+      current_piece = find_piece(computer_piece, @board_nodes)
+      @current_black = []
+    end
+
+    if current_piece.nil?
+      select_piece
+    end
+    #check if current player can move piece
+    if @current_player[0].color != current_piece.color
+      puts "Select a valid piece"
+      select_piece
+    end
 
     case current_piece.class.name
     when "Pawn"
-      current_piece.find_possible_moves(@board_nodes)
+      current_piece.find_possible_moves(@board_nodes, @current_player[0])
       puts "Move the pawn"
     when "Knight"
-      current_piece.find_possible_moves(@board_nodes)
+      current_piece.find_possible_moves(@board_nodes, @current_player[0])
       puts "Move the knight"
     when "Bishop"
-      current_piece.find_possible_moves(@board_nodes)
+      current_piece.find_possible_moves(@board_nodes, @current_player[0])
       puts "Move the bishop"
     when "Rook"
-      current_piece.find_possible_moves(@board_nodes)
+      current_piece.find_possible_moves(@board_nodes, @current_player[0])
       puts "Move the rook"
     when "King"
-      current_piece.find_possible_moves(@board_nodes)
+      current_piece.find_possible_moves(@board_nodes, @current_player[0])
       puts "Move the king"
     when "Queen"
-      current_piece.find_possible_moves(@board_nodes)
+      current_piece.find_possible_moves(@board_nodes, @current_player[0])
       puts "Move the queen"
     else
       "You did not select a piece."
@@ -194,26 +224,27 @@ class Board
     unless current_piece.possible_moves.empty?
       print_board
 
-      puts "Pick one of these possible moves:"
-      current_piece.possible_moves.each do |n|
-        n.current_symbol = " "
-        print "#{n.position}"
-      end
+      p current_piece.possible_moves
+      destination_square = select_possible_move(current_piece)
+      p destination_square
+      piece_destination = destination_square.position
 
-      piece_destination_x = gets.chomp.to_i
-      piece_destination_y = gets.chomp.to_i
-      piece_destination = [piece_destination_x, piece_destination_y]
-      desination_square = find_square(piece_destination, @board_nodes)
-
-      current_piece.move_history.push(desination_square)
+      current_piece.move_history.push(destination_square)
 
       move_piece(piece_destination, current_piece)
     end
+
+    select_piece
   end
 
   def move_piece(piece_destination, current_piece)
     desination_square = find_square(piece_destination, @board_nodes)
     current_square = current_piece.current_square
+
+    if desination_square.current_piece.nil? == false && desination_square.current_piece.color != current_piece.color
+      @current_player[0].captured_pieces.push(desination_square.current_piece)
+      @current_player[1].lost_pieces.push(desination_square.current_piece)
+    end
 
     #update destination square and connect to current piece
     current_piece.current_square = desination_square
@@ -228,69 +259,36 @@ class Board
 
     desination_square.occupied = true
 
-    #clear curremt square
+    #clear current square
     current_square.current_piece = nil
     current_square.current_symbol = " "
     current_square.occupied = false
 
     print_board
+    @current_player = @current_player.reverse
     select_piece
   end
 
-  def current_board_state
-    current_board = @board_nodes
-    count = 1
-
-    current_board.each_with_index do |n, i|
-      if i % 8 == 0
-        print "\n"
-        puts "   ========================================================================"
-        print " #{count} "
-
-        count += 1
+  def select_possible_move(current_piece)
+    puts "Pick one of these possible moves:"
+      current_piece.possible_moves.each do |n|
+        n.current_symbol = " "
+        print "#{n.position}"
       end
+
+    if @current_player[0].class.name == "Player"
+      piece_destination_x = gets.chomp.to_i
+      piece_destination_y = gets.chomp.to_i
+
+      piece_destination = [piece_destination_x, piece_destination_y]
+
+      destination_square = find_square(piece_destination, @board_nodes)
+    else
+      piece_destination = current_piece.possible_moves.sample
       
-      if n.current_piece == nil
-        print "|  nil  |"
-      elsif n.current_piece.color == "white"
-        case n.current_piece.class.name
-        when "Pawn"
-          print "| #{n.current_piece.class.name[0]} + 1 |"
-        when "Knight"
-          print "| #{n.current_piece.class.name[0]} + 2 |"
-        when "Bishop"
-          print "| #{n.current_piece.class.name[0]} + 3 |"
-        when "Rook"
-          print "| #{n.current_piece.class.name[0]} + 5 |"
-        when "King"
-          print "| #{n.current_piece.class.name[0]} + 10 |"
-        when "Queen"
-          print "| #{n.current_piece.class.name[0]} + 9 |"
-        else
-          "You did not select a piece."
-        end
-      elsif n.current_piece.color == "black"
-        case n.current_piece.class.name
-        when "Pawn"
-          print "| #{n.current_piece.class.name[0]} - 1 |"
-        when "Knight"
-          print "| #{n.current_piece.class.name[0]} - 2 |"
-        when "Bishop"
-          print "| #{n.current_piece.class.name[0]} - 3 |"
-        when "Rook"
-          print "| #{n.current_piece.class.name[0]} - 5 |"
-        when "King"
-          print "| #{n.current_piece.class.name[0]} - 10 |"
-        when "Queen"
-          print "| #{n.current_piece.class.name[0]} - 9 |"
-        else
-          "You did not select a piece."
-        end
-      end
+      destination_square = find_square(piece_destination.position, @board_nodes)
     end
-
-    print "\n"
-    puts "   ========================================================================"
-    puts "     h    g    f    e    d    c    b    a  "
+     
+    destination_square
   end
 end

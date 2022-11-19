@@ -28,7 +28,7 @@ class Pawn
     @move_history = []
   end
 
-  def find_possible_moves(board_nodes)
+  def find_possible_moves(board_nodes, current_player)
     p self.current_position
     p self.color
 
@@ -55,7 +55,12 @@ class Pawn
       possible_move_square = find_square([pos_x, pos_y], board_nodes)
       
       if possible_move_square == nil || possible_move_square.occupied == true
-        break
+        unless pos_x > 8 || pos_y > 8 || pos_y < 1 || pos_x < 1 || possible_move_square.nil? || possible_move_square.current_piece.color == current_player.color
+          self.possible_moves.push(possible_move_square)
+          break
+        else
+          break
+        end
       end
       
       unless pos_x > 8 || pos_y > 8 || pos_y < 1 || pos_x < 1 || possible_move_square.occupied == true
@@ -70,7 +75,7 @@ end
 class Knight
   include Search
   attr_accessor :black_symbol, :white_symbol, 
-  :current_square, :current_position, :color, :possible_moves
+  :current_square, :current_position, :color, :possible_moves, :move_history
 
   def initialize
     @color = nil
@@ -79,62 +84,42 @@ class Knight
     @black_symbol = "\u2658".encode('utf-8')
     @white_symbol = "\u265E".encode('utf-8')
     @possible_moves = []
+    @move_history = []
   end
 
-  def find_possible_moves(board_nodes)
+  def find_possible_moves(board_nodes, current_player)
     p self.current_position
     p self.color
 
     self.possible_moves = []
 
-    valid_moves = find_valid_moves
+    valid_moves = [[-1, -2], [-2, -1], [-2, 1], [-1, 2], [1, -2], [2, -1], [2, 1], [1, 2]]
 
-    valid_moves.each do |a|
-      a.each do |m|
-        pos_x = self.current_position[0] + m[0]
-        pos_y = self.current_position[1] + m[1]
+    valid_moves.each do |m|
+      pos_x = self.current_position[0] + m[0]
+      pos_y = self.current_position[1] + m[1]
+      
+      possible_move_square = find_square([pos_x, pos_y], board_nodes)
 
-        possible_move_square = find_square([pos_x, pos_y], board_nodes)
-
-        if possible_move_square == nil || possible_move_square.occupied == true
-          break
-        end
-        
-        unless pos_x > 8 || pos_y > 8 || pos_y < 1 || pos_x < 1 || possible_move_square.occupied == true
-        #return position of squares that can be moved to
+      if possible_move_square == nil || possible_move_square.occupied == true
+        unless pos_x > 8 || pos_y > 8 || pos_y < 1 || pos_x < 1 || possible_move_square.nil? || possible_move_square.current_piece.color == current_player.color
           self.possible_moves.push(possible_move_square)
         end
       end
+      
+      unless pos_x > 8 || pos_y > 8 || pos_y < 1 || pos_x < 1 || possible_move_square.occupied == true
+      #return position of squares that can be moved to
+        possible_move_square.current_symbol = "X"
+        self.possible_moves.push(possible_move_square)
+      end
     end
-  end
-
-  def find_valid_moves
-    valid_moves = []
-    valid_moves_y = []
-    valid_moves_y_neg = []
-    valid_moves_x = []
-    valid_moves_x_neg = []
-
-    (1..8).each do |i|
-      valid_moves_y.push([0, i])
-      valid_moves_x.push([i, 0])
-      valid_moves_y_neg.push([0, i * -1])
-      valid_moves_x_neg.push([i * -1, 0])
-    end
-
-    valid_moves.push(valid_moves_y)
-    valid_moves.push(valid_moves_y_neg)
-    valid_moves.push(valid_moves_x)
-    valid_moves.push(valid_moves_x_neg)
-
-    valid_moves
   end
 end
 
 class Bishop
   include Search
   attr_accessor :black_symbol, :white_symbol, 
-  :current_square, :current_position, :color, :possible_moves
+  :current_square, :current_position, :color, :possible_moves, :move_history
 
   def initialize
     @color = nil
@@ -143,9 +128,10 @@ class Bishop
     @black_symbol = "\u2657".encode('utf-8')
     @white_symbol = "\u265D".encode('utf-8')
     @possible_moves = []
+    @move_history = []
   end
 
-  def find_possible_moves(board_nodes)
+  def find_possible_moves(board_nodes, current_player)
     p self.current_position
     p self.color
 
@@ -161,7 +147,12 @@ class Bishop
         possible_move_square = find_square([pos_x, pos_y], board_nodes)
 
         if possible_move_square == nil || possible_move_square.occupied == true
-          break
+          unless pos_x > 8 || pos_y > 8 || pos_y < 1 || pos_x < 1 || possible_move_square.nil? || possible_move_square.current_piece.color == current_player.color
+            self.possible_moves.push(possible_move_square)
+            break
+          else
+            break
+          end
         end
         
         unless pos_x > 8 || pos_y > 8 || pos_y < 1 || pos_x < 1 || possible_move_square.occupied == true
@@ -199,7 +190,7 @@ end
 class Rook
   include Search
   attr_accessor :black_symbol, :white_symbol, 
-  :current_square, :current_position, :color, :possible_moves
+  :current_square, :current_position, :color, :possible_moves, :move_history
 
   def initialize
     @color = nil
@@ -208,9 +199,10 @@ class Rook
     @black_symbol = "\u2656".encode('utf-8')
     @white_symbol = "\u265C".encode('utf-8')
     @possible_moves = []
+    @move_history = []
   end
 
-  def find_possible_moves(board_nodes)
+  def find_possible_moves(board_nodes, current_player)
     p self.current_position
     p self.color
 
@@ -226,7 +218,12 @@ class Rook
         possible_move_square = find_square([pos_x, pos_y], board_nodes)
 
         if possible_move_square == nil || possible_move_square.occupied == true
-          break
+          unless pos_x > 8 || pos_y > 8 || pos_y < 1 || pos_x < 1 || possible_move_square.nil? || possible_move_square.current_piece.color == current_player.color
+            self.possible_moves.push(possible_move_square)
+            break
+          else
+            break
+          end
         end
         
         unless pos_x > 8 || pos_y > 8 || pos_y < 1 || pos_x < 1 || possible_move_square.occupied == true
@@ -264,7 +261,7 @@ end
 class King
   include Search
   attr_accessor :black_symbol, :white_symbol, 
-  :current_square, :current_position, :color, :possible_moves
+  :current_square, :current_position, :color, :possible_moves, :move_history
 
   def initialize
     @color = nil
@@ -273,9 +270,10 @@ class King
     @black_symbol = "\u2654".encode('utf-8')
     @white_symbol = "\u265A".encode('utf-8')
     @possible_moves = []
+    @move_history = []
   end
 
-  def find_possible_moves(board_nodes)
+  def find_possible_moves(board_nodes, current_player)
     p self.current_position
     p self.color
 
@@ -291,7 +289,12 @@ class King
         possible_move_square = find_square([pos_x, pos_y], board_nodes)
 
         if possible_move_square == nil || possible_move_square.occupied == true
-          break
+          unless pos_x > 8 || pos_y > 8 || pos_y < 1 || pos_x < 1 || possible_move_square.nil? || possible_move_square.current_piece.color == current_player.color
+            self.possible_moves.push(possible_move_square)
+            break
+          else
+            break
+          end
         end
         
         unless pos_x > 8 || pos_y > 8 || pos_y < 1 || pos_x < 1 || possible_move_square.occupied == true
@@ -327,7 +330,7 @@ end
 class Queen
   include Search
   attr_accessor :black_symbol, :white_symbol, 
-  :current_square, :current_position, :color, :possible_moves
+  :current_square, :current_position, :color, :possible_moves, :move_history
 
   def initialize
     @color = nil
@@ -336,9 +339,10 @@ class Queen
     @black_symbol = "\u2655".encode('utf-8')
     @white_symbol = "\u265B".encode('utf-8')
     @possible_moves = []
+    @move_history = []
   end
 
-  def find_possible_moves(board_nodes)
+  def find_possible_moves(board_nodes, current_player)
     p self.current_position
     p self.color
 
@@ -354,7 +358,12 @@ class Queen
         possible_move_square = find_square([pos_x, pos_y], board_nodes)
 
         if possible_move_square == nil || possible_move_square.occupied == true
-          break
+          unless pos_x > 8 || pos_y > 8 || pos_y < 1 || pos_x < 1 || possible_move_square.nil? || possible_move_square.current_piece.color == current_player.color
+            self.possible_moves.push(possible_move_square)
+            break
+          else
+            break
+          end
         end
         
         unless pos_x > 8 || pos_y > 8 || pos_y < 1 || pos_x < 1 || possible_move_square.occupied == true

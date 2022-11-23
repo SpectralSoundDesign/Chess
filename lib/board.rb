@@ -1,6 +1,7 @@
 require_relative 'pieces.rb'
 require_relative 'utilities.rb'
 require_relative 'player.rb'
+require 'pry'
 
 class Board
   include Search
@@ -14,12 +15,47 @@ class Board
         @board_nodes.push(Square.new(j, i))
       end
     end
-    player1 = Player.new('white')
-    player2 = Player.new('black')
-    computer = Computer.new('black')
-    @current_player = [player1, computer]
+    @player1 = Player.new('white')
+    @player2 = Player.new('black')
+    @computer = Computer.new('black')
+    @current_player = [@player1, @computer]
     @current_white = []
     @current_black = []
+  end
+
+  def start
+    populate_board
+    
+    puts ""
+    puts "       ================================"
+    puts "               WELCOME TO CHESS        "
+    puts "       ================================"
+    puts "           Please select a gamemode    "
+    puts "       --------------------------------"
+    puts "             1) Player v Player        "
+    puts "             2) Player v Computer      "
+    puts "             3) EXIT     "
+    puts "       --------------------------------"
+    menu_selection = gets.chomp.to_i
+
+    case menu_selection
+    when 1
+      puts "Generating board..."
+      @current_player[1] = @player2
+      print_board
+      select_piece
+    when 2
+      puts "Generating board..."
+      @current_player[1] = @computer
+      print_board
+      select_piece
+    when 3
+      puts "Exiting..."
+      exit
+    else
+      puts "Select an option:"
+      start
+    end
   end
 
   def print_board
@@ -170,23 +206,25 @@ class Board
 
   def select_piece
     puts "#{@current_player[0].color}, choose location of piece to move:"
-    
-    if @current_player[0].class.name == "Player"
+
+    if @current_player[0].class.name == "Computer"
+      @board_nodes.each do |n|
+        if n.current_piece.nil? == false && n.current_piece.color == 'black'
+          @current_black.push(n.current_piece)
+          find_possible_piece_moves(n.current_piece)
+        end
+      end
+      
+      computer_piece = @current_black.sample
+      
+      current_piece = find_piece(computer_piece.current_position, @board_nodes)
+
+      @current_black = []
+    else
       find_piece_x = gets.chomp.to_i
       find_piece_y = gets.chomp.to_i
 
       current_piece = find_piece([find_piece_x, find_piece_y], @board_nodes)
-    else
-      @board_nodes.each do |n|
-        if n.current_piece.nil? == false && n.current_piece.color == 'black'
-          @current_black.push(n.position)
-        end
-      end
-
-      computer_piece = @current_black.sample
-      
-      current_piece = find_piece(computer_piece, @board_nodes)
-      @current_black = []
     end
 
     if current_piece.nil?
@@ -198,35 +236,14 @@ class Board
       select_piece
     end
 
-    case current_piece.class.name
-    when "Pawn"
-      current_piece.find_possible_moves(@board_nodes, @current_player[0])
-      puts "Move the pawn"
-    when "Knight"
-      current_piece.find_possible_moves(@board_nodes, @current_player[0])
-      puts "Move the knight"
-    when "Bishop"
-      current_piece.find_possible_moves(@board_nodes, @current_player[0])
-      puts "Move the bishop"
-    when "Rook"
-      current_piece.find_possible_moves(@board_nodes, @current_player[0])
-      puts "Move the rook"
-    when "King"
-      current_piece.find_possible_moves(@board_nodes, @current_player[0])
-      puts "Move the king"
-    when "Queen"
-      current_piece.find_possible_moves(@board_nodes, @current_player[0])
-      puts "Move the queen"
-    else
-      "You did not select a piece."
+    if @current_player[0].class.name == "Player"
+      find_possible_piece_moves(current_piece)
     end
     
     unless current_piece.possible_moves.empty?
       print_board
 
-      p current_piece.possible_moves
       destination_square = select_possible_move(current_piece)
-      p destination_square
       piece_destination = destination_square.position
 
       current_piece.move_history.push(destination_square)
@@ -269,11 +286,44 @@ class Board
     select_piece
   end
 
+  def find_possible_piece_moves(current_piece)
+    case current_piece.class.name
+    when "Pawn"
+      current_piece.find_possible_moves(@board_nodes, @current_player[0])
+      puts "Move the pawn"
+    when "Knight"
+      current_piece.find_possible_moves(@board_nodes, @current_player[0])
+      puts "Move the knight"
+    when "Bishop"
+      current_piece.find_possible_moves(@board_nodes, @current_player[0])
+      puts "Move the bishop"
+    when "Rook"
+      current_piece.find_possible_moves(@board_nodes, @current_player[0])
+      puts "Move the rook"
+    when "King"
+      current_piece.find_possible_moves(@board_nodes, @current_player[0])
+      puts "Move the king"
+    when "Queen"
+      current_piece.find_possible_moves(@board_nodes, @current_player[0])
+      puts "Move the queen"
+    else
+      "You did not select a piece."
+    end
+  end
+
   def select_possible_move(current_piece)
+    possible_captures = []
     puts "Pick one of these possible moves:"
       current_piece.possible_moves.each do |n|
         n.current_symbol = " "
-        print "#{n.position}"
+
+        if n.current_piece.nil? == false && n.current_piece.color != @current_player[0].color
+          puts "Possible take: #{n.position}"
+          possible_captures.push(n)
+        else
+
+          print "#{n.position}"
+        end
       end
 
     if @current_player[0].class.name == "Player"
@@ -284,7 +334,11 @@ class Board
 
       destination_square = find_square(piece_destination, @board_nodes)
     else
-      piece_destination = current_piece.possible_moves.sample
+      if possible_captures.empty? == false
+        piece_destination = possible_captures[0]
+      else
+        piece_destination = current_piece.possible_moves.sample
+      end
       
       destination_square = find_square(piece_destination.position, @board_nodes)
     end

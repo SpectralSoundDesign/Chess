@@ -65,7 +65,12 @@ class Pawn
       
       unless pos_x > 8 || pos_y > 8 || pos_y < 1 || pos_x < 1 || possible_move_square.occupied == true
       #return position of squares that can be moved to
-        possible_move_square.current_symbol = "X"
+        if current_player.class.name == "Computer"
+          possible_move_square.current_symbol = " "
+        else
+          possible_move_square.current_symbol = "X"
+        end
+
         self.possible_moves.push(possible_move_square)
       end
     end
@@ -109,7 +114,12 @@ class Knight
       
       unless pos_x > 8 || pos_y > 8 || pos_y < 1 || pos_x < 1 || possible_move_square.occupied == true
       #return position of squares that can be moved to
-        possible_move_square.current_symbol = "X"
+        if current_player.class.name == "Computer"
+          possible_move_square.current_symbol = " "
+        else
+          possible_move_square.current_symbol = "X"
+        end
+
         self.possible_moves.push(possible_move_square)
       end
     end
@@ -157,7 +167,12 @@ class Bishop
         
         unless pos_x > 8 || pos_y > 8 || pos_y < 1 || pos_x < 1 || possible_move_square.occupied == true
         #return position of squares that can be moved to
-          possible_move_square.current_symbol = "X"
+          if current_player.class.name == "Computer"
+            possible_move_square.current_symbol = " "
+          else
+            possible_move_square.current_symbol = "X"
+          end
+
           self.possible_moves.push(possible_move_square)
         end
       end
@@ -228,7 +243,12 @@ class Rook
         
         unless pos_x > 8 || pos_y > 8 || pos_y < 1 || pos_x < 1 || possible_move_square.occupied == true
         #return position of squares that can be moved to
-          possible_move_square.current_symbol = "X"
+          if current_player.class.name == "Computer"
+            possible_move_square.current_symbol = " "
+          else
+            possible_move_square.current_symbol = "X"
+          end
+
           self.possible_moves.push(possible_move_square)
         end
       end
@@ -299,7 +319,12 @@ class King
         
         unless pos_x > 8 || pos_y > 8 || pos_y < 1 || pos_x < 1 || possible_move_square.occupied == true
         #return position of squares that can be moved to
-          possible_move_square.current_symbol = "X"
+          if current_player.class.name == "Computer"
+            possible_move_square.current_symbol = " "
+          else
+            possible_move_square.current_symbol = "X"
+          end
+
           self.possible_moves.push(possible_move_square)
         end
       end
@@ -368,7 +393,12 @@ class Queen
         
         unless pos_x > 8 || pos_y > 8 || pos_y < 1 || pos_x < 1 || possible_move_square.occupied == true
         #return position of squares that can be moved to
-          possible_move_square.current_symbol = "X"
+          if current_player.class.name == "Computer"
+            possible_move_square.current_symbol = " "
+          else
+            possible_move_square.current_symbol = "X"
+          end
+
           self.possible_moves.push(possible_move_square)
         end
       end

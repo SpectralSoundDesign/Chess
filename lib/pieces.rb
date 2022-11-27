@@ -337,16 +337,28 @@ class King
     valid_moves_y_neg = []
     valid_moves_x = []
     valid_moves_x_neg = []
+    valid_moves_y_diag = []
+    valid_moves_x_diag = []
+    valid_moves_y_neg_diag = []
+    valid_moves_x_neg_diag = []
 
     valid_moves_y.push([0, 1])
     valid_moves_x.push([1, 0])
     valid_moves_y_neg.push([0, -1])
     valid_moves_x_neg.push([-1, 0])
+    valid_moves_y_diag.push([-1, 1])
+    valid_moves_x_diag.push([1, 1])
+    valid_moves_y_neg_diag.push([1, -1])
+    valid_moves_x_neg_diag.push([-1, -1])
 
     valid_moves.push(valid_moves_y)
     valid_moves.push(valid_moves_y_neg)
     valid_moves.push(valid_moves_x)
     valid_moves.push(valid_moves_x_neg)
+    valid_moves.push(valid_moves_y_diag)
+    valid_moves.push(valid_moves_y_neg_diag)
+    valid_moves.push(valid_moves_x_diag)
+    valid_moves.push(valid_moves_x_neg_diag)
 
     valid_moves
   end

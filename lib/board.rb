@@ -205,6 +205,9 @@ class Board
   end
 
   def select_piece
+    in_check?
+    @current_black = []
+    puts "Check: #{@current_player[0].in_check}"
     puts "#{@current_player[0].color}, choose location of piece to move:"
 
     if @current_player[0].class.name == "Computer"
@@ -218,8 +221,6 @@ class Board
       computer_piece = @current_black.sample
       
       current_piece = find_piece(computer_piece.current_position, @board_nodes)
-
-      @current_black = []
     else
       find_piece_x = gets.chomp.to_i
       find_piece_y = gets.chomp.to_i
@@ -315,13 +316,12 @@ class Board
     possible_captures = []
     puts "Pick one of these possible moves:"
       current_piece.possible_moves.each do |n|
-        n.current_symbol = " "
-
         if n.current_piece.nil? == false && n.current_piece.color != @current_player[0].color
           puts "Possible take: #{n.position}"
           possible_captures.push(n)
         else
-
+          n.current_symbol = " "
+          
           print "#{n.position}"
         end
       end
@@ -344,5 +344,25 @@ class Board
     end
      
     destination_square
+  end
+
+  def in_check?
+    if @current_player[0].color == 'white'
+      #check all possible moves for current black pieces
+      @current_black.each do |piece|
+        if piece.possible_moves.empty? == false
+          piece.possible_moves.each do |move|
+            possible_move_square = find_square(move.position, @board_nodes)
+            possible_move_piece = possible_move_square.current_piece
+            #check if any black piece can take the white king and set in_check for white to true
+            if possible_move_piece.class.name == "King"
+              @current_player[0].in_check = true
+            else
+              @current_player[0].in_check = false
+            end
+          end
+        end
+      end
+    end
   end
 end

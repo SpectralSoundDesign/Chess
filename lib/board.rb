@@ -321,7 +321,7 @@ class Board
           possible_captures.push(n)
         else
           n.current_symbol = " "
-          
+
           print "#{n.position}"
         end
       end
@@ -333,6 +333,17 @@ class Board
       piece_destination = [piece_destination_x, piece_destination_y]
 
       destination_square = find_square(piece_destination, @board_nodes)
+
+      while current_piece.possible_moves.include?(destination_square) == false
+        puts "Select valid destination:"
+
+        piece_destination_x = gets.chomp.to_i
+        piece_destination_y = gets.chomp.to_i
+
+        piece_destination = [piece_destination_x, piece_destination_y]
+
+        destination_square = find_square(piece_destination, @board_nodes)
+      end
     else
       if possible_captures.empty? == false
         piece_destination = possible_captures[0]

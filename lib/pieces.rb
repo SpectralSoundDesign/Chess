@@ -29,9 +29,6 @@ class Pawn
   end
 
   def find_possible_moves(board_nodes, current_player)
-    p self.current_position
-    p self.color
-
     self.possible_moves = []
 
     if self.color == 'white'
@@ -93,9 +90,6 @@ class Knight
   end
 
   def find_possible_moves(board_nodes, current_player)
-    p self.current_position
-    p self.color
-
     self.possible_moves = []
 
     valid_moves = [[-1, -2], [-2, -1], [-2, 1], [-1, 2], [1, -2], [2, -1], [2, 1], [1, 2]]
@@ -142,9 +136,6 @@ class Bishop
   end
 
   def find_possible_moves(board_nodes, current_player)
-    p self.current_position
-    p self.color
-
     self.possible_moves = []
 
     valid_moves = find_valid_moves
@@ -218,9 +209,6 @@ class Rook
   end
 
   def find_possible_moves(board_nodes, current_player)
-    p self.current_position
-    p self.color
-
     self.possible_moves = []
 
     valid_moves = find_valid_moves
@@ -294,9 +282,6 @@ class King
   end
 
   def find_possible_moves(board_nodes, current_player)
-    p self.current_position
-    p self.color
-
     self.possible_moves = []
 
     valid_moves = find_valid_moves
@@ -380,9 +365,6 @@ class Queen
   end
 
   def find_possible_moves(board_nodes, current_player)
-    p self.current_position
-    p self.color
-
     self.possible_moves = []
 
     valid_moves = find_valid_moves

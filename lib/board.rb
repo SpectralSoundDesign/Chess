@@ -206,39 +206,47 @@ class Board
 
   def select_piece
     in_check?
-    @current_black = []
+
     puts "Check: #{@current_player[0].in_check}"
     puts "#{@current_player[0].color}, choose location of piece to move:"
 
     if @current_player[0].class.name == "Computer"
-      @board_nodes.each do |n|
-        if n.current_piece.nil? == false && n.current_piece.color == 'black'
-          @current_black.push(n.current_piece)
-          find_possible_piece_moves(n.current_piece)
-        end
-      end
-      
       computer_piece = @current_black.sample
       
       current_piece = find_piece(computer_piece.current_position, @board_nodes)
-    else
+
+      @current_black = []
+      @current_white = []
+    else   
       find_piece_x = gets.chomp.to_i
       find_piece_y = gets.chomp.to_i
 
       current_piece = find_piece([find_piece_x, find_piece_y], @board_nodes)
+
+      @current_black = []
+      @current_white = []
     end
 
     if current_piece.nil?
       select_piece
     end
-    #check if current player can move piece
-    if @current_player[0].color != current_piece.color
-      puts "Select a valid piece"
-      select_piece
+
+    get_current_black
+    get_current_white
+
+    @board_nodes.each do |n|
+      if n.current_symbol == "X"
+        n.current_symbol = " "
+      end
     end
 
     if @current_player[0].class.name == "Player"
       find_possible_piece_moves(current_piece)
+    end
+    #check if current player can move piece
+    if @current_player[0].color != current_piece.color
+      puts "Select a valid piece"
+      select_piece
     end
     
     unless current_piece.possible_moves.empty?
@@ -291,22 +299,16 @@ class Board
     case current_piece.class.name
     when "Pawn"
       current_piece.find_possible_moves(@board_nodes, @current_player[0])
-      puts "Move the pawn"
     when "Knight"
       current_piece.find_possible_moves(@board_nodes, @current_player[0])
-      puts "Move the knight"
     when "Bishop"
       current_piece.find_possible_moves(@board_nodes, @current_player[0])
-      puts "Move the bishop"
     when "Rook"
       current_piece.find_possible_moves(@board_nodes, @current_player[0])
-      puts "Move the rook"
     when "King"
       current_piece.find_possible_moves(@board_nodes, @current_player[0])
-      puts "Move the king"
     when "Queen"
       current_piece.find_possible_moves(@board_nodes, @current_player[0])
-      puts "Move the queen"
     else
       "You did not select a piece."
     end
@@ -314,17 +316,19 @@ class Board
 
   def select_possible_move(current_piece)
     possible_captures = []
-    puts "Pick one of these possible moves:"
-      current_piece.possible_moves.each do |n|
-        if n.current_piece.nil? == false && n.current_piece.color != @current_player[0].color
-          puts "Possible take: #{n.position}"
-          possible_captures.push(n)
-        else
-          n.current_symbol = " "
 
-          print "#{n.position}"
-        end
+    puts "Pick one of these possible moves:"
+
+    current_piece.possible_moves.each do |n|
+      if n.current_piece.nil? == false && n.current_piece.color != @current_player[0].color
+        puts "Possible take: #{n.position}"
+        possible_captures.push(n)
+      else
+        n.current_symbol = " "
+
+        print "#{n.position}"
       end
+    end
 
     if @current_player[0].class.name == "Player"
       piece_destination_x = gets.chomp.to_i
@@ -358,21 +362,50 @@ class Board
   end
 
   def in_check?
-    if @current_player[0].color == 'white'
+    @current_player[0].in_check = false
       #check all possible moves for current black pieces
-      @current_black.each do |piece|
-        if piece.possible_moves.empty? == false
-          piece.possible_moves.each do |move|
-            possible_move_square = find_square(move.position, @board_nodes)
-            possible_move_piece = possible_move_square.current_piece
-            #check if any black piece can take the white king and set in_check for white to true
-            if possible_move_piece.class.name == "King"
-              @current_player[0].in_check = true
-            else
-              @current_player[0].in_check = false
-            end
+    @current_black.each do |piece|
+      if piece.possible_moves.empty? == false
+        piece.possible_moves.each do |move|
+          possible_move_piece = move.current_piece
+          #check if any black piece can take the white king and set in_check for white to true
+          if possible_move_piece.class.name == "King"
+            @current_player[0].in_check = true
+            find_king_moves(possible_move_piece)
           end
         end
+      end
+    end
+  end
+
+  def find_king_moves(king)
+    @current_black.each do |piece|
+      if piece.possible_moves.empty? == false
+        piece.possible_moves.each do |move|
+          possible_move_piece = move.current_piece
+          
+          if king.possible_moves.include?(possible_move_piece) == true
+            puts "Not #{possible_move_piece.current_position}"
+          end
+        end
+      end
+    end
+  end
+
+  def get_current_black
+    @board_nodes.each do |n|
+      if n.current_piece.nil? == false && n.current_piece.color == 'black'
+        @current_black.push(n.current_piece)
+        find_possible_piece_moves(n.current_piece)
+      end
+    end
+  end
+
+  def get_current_white
+    @board_nodes.each do |n|
+      if n.current_piece.nil? == false && n.current_piece.color == 'white'
+        @current_white.push(n.current_piece)
+        find_possible_piece_moves(n.current_piece)
       end
     end
   end

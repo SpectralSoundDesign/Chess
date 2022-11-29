@@ -218,10 +218,26 @@ class Board
       @current_black = []
       @current_white = []
     else   
-      find_piece_x = gets.chomp.to_i
-      find_piece_y = gets.chomp.to_i
+      if @current_player[0].in_check == true
+        puts "Move the king out of check."
 
-      current_piece = find_piece([find_piece_x, find_piece_y], @board_nodes)
+        king = nil
+
+        @board_nodes.each do |n|
+          board_current_piece = n.current_piece
+
+          if board_current_piece.class.name == "King" && board_current_piece.color == @current_player[0].color
+            king = board_current_piece
+          end
+        end
+
+        current_piece = king
+      else
+        find_piece_x = gets.chomp.to_i
+        find_piece_y = gets.chomp.to_i
+
+        current_piece = find_piece([find_piece_x, find_piece_y], @board_nodes)
+      end
 
       @current_black = []
       @current_white = []
@@ -242,6 +258,10 @@ class Board
 
     if @current_player[0].class.name == "Player"
       find_possible_piece_moves(current_piece)
+
+      if @current_player[0].in_check == true
+        find_king_moves(current_piece)
+      end
     end
     #check if current player can move piece
     if @current_player[0].color != current_piece.color
@@ -371,7 +391,6 @@ class Board
           #check if any black piece can take the white king and set in_check for white to true
           if possible_move_piece.class.name == "King"
             @current_player[0].in_check = true
-            find_king_moves(possible_move_piece)
           end
         end
       end
@@ -382,10 +401,9 @@ class Board
     @current_black.each do |piece|
       if piece.possible_moves.empty? == false
         piece.possible_moves.each do |move|
-          possible_move_piece = move.current_piece
-          
-          if king.possible_moves.include?(possible_move_piece) == true
-            puts "Not #{possible_move_piece.current_position}"
+          if king.possible_moves.include?(move) == true
+            king.possible_moves.delete(move)
+            move.current_symbol = " "
           end
         end
       end
